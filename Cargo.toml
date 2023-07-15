@@ -1,11 +1,11 @@
 [package]
-name = "akatsuki-pp"
-version = "0.9.4"
-authors = ["MaxOhn <ohn.m@hotmail.de>", "tsunyoku <tsunyoku@gmail.com>"]
+name = "fuquila-pp"
+version = "0.9.5"
+authors = ["MaxOhn <ohn.m@hotmail.de>", "tsunyoku <tsunyoku@gmail.com>", "Aochi <aochi@fuquila.net>"]
 edition = "2018"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/osuAkatsuki/akatsuki-pp"
+repository = "https://github.com/osufuquila/fuquila-pp-rs"
 description = "osu! difficulty and pp calculation for all modes"
 keywords = ["osu", "pp", "stars", "async"]
 

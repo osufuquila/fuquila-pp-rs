@@ -464,7 +464,8 @@ impl OsuPpInner {
 
         let total_hits = self.total_hits();
 
-        let len_bonus = 0.95
+        // 0.01 buff from rx because relax cheats are stupid lol
+        let len_bonus = 0.96
             + 0.4 * (total_hits / 2000.0).min(1.0)
             + (total_hits > 2000.0) as u8 as f64 * (total_hits / 2000.0).log10() * 0.5;
 
@@ -472,30 +473,33 @@ impl OsuPpInner {
 
         // * Penalize misses by assessing # of misses relative to the total # of objects.
         // * Default a 3% reduction for any # of misses.
+        // Now that i changed it idk if its 3% anymore LOL
         if self.effective_miss_count > 0.0 {
-            aim_value *= 0.97
+            aim_value *= 0.94
                 * (1.0 - (self.effective_miss_count / total_hits).powf(0.775))
                     .powf(self.effective_miss_count);
         }
 
         aim_value *= self.get_combo_scaling_factor();
 
-        let ar_factor = if self.mods.rx() {
-            0.0
-        } else if self.attrs.ar > 10.33 {
-            0.3 * (self.attrs.ar - 10.33)
-        } else if self.attrs.ar < 8.0 {
-            0.05 * (8.0 - self.attrs.ar)
-        } else {
-            0.0
-        };
+        // useless as ar changer exists
+        // let ar_factor = if self.mods.rx() {
+        //     0.0
+        // } else if self.attrs.ar > 10.33 {
+        //     0.3 * (self.attrs.ar - 10.33)
+        // } else if self.attrs.ar < 8.0 {
+        //     0.05 * (8.0 - self.attrs.ar)
+        // } else {
+        //     0.0
+        // };
 
-        // * Buff for longer maps with high AR.
-        aim_value *= 1.0 + ar_factor * len_bonus;
+        // // * Buff for longer maps with high AR.
+        // aim_value *= 1.0 + ar_factor * len_bonus;
 
         if self.mods.hd() {
             // * We want to give more reward for lower AR when it comes to aim and HD. This nerfs high AR and buffs lower AR.
-            aim_value *= 1.0 + 0.04 * (12.0 - self.attrs.ar);
+            // because you can use ar changer, we will have a lower value
+            aim_value *= 1.0 + 0.023 * (12.0 - self.attrs.ar);
         }
 
         // * We assume 15% of sliders in a map are difficult since there's no way to tell from the performance calculator.
@@ -515,7 +519,7 @@ impl OsuPpInner {
 
         aim_value *= self.acc;
         // * It is important to consider accuracy difficulty when scaling with accuracy.
-        aim_value *= 0.98 + self.attrs.od * self.attrs.od / 2500.0;
+        aim_value *= 0.964 + self.attrs.od * self.attrs.od / 2500.0;
 
         aim_value
     }
@@ -530,7 +534,7 @@ impl OsuPpInner {
 
         let total_hits = self.total_hits();
 
-        let len_bonus = 0.95
+        let len_bonus = 0.96
             + 0.4 * (total_hits / 2000.0).min(1.0)
             + (total_hits > 2000.0) as u8 as f64 * (total_hits / 2000.0).log10() * 0.5;
 
@@ -546,21 +550,21 @@ impl OsuPpInner {
 
         speed_value *= self.get_combo_scaling_factor();
 
-        let ar_factor = if self.mods.ap() {
-            0.0
-        } else if self.attrs.ar > 10.33 {
-            0.3 * (self.attrs.ar - 10.33)
-        } else {
-            0.0
-        };
+        // let ar_factor = if self.mods.ap() {
+        //     0.0
+        // } else if self.attrs.ar > 10.33 {
+        //     0.3 * (self.attrs.ar - 10.33)
+        // } else {
+        //     0.0
+        // };
 
-        // * Buff for longer maps with high AR.
-        speed_value *= 1.0 + ar_factor * len_bonus;
+        // // * Buff for longer maps with high AR.
+        // speed_value *= 1.0 + ar_factor * len_bonus;
 
         if self.mods.hd() {
             // * We want to give more reward for lower AR when it comes to aim and HD.
             // * This nerfs high AR and buffs lower AR.
-            speed_value *= 1.0 + 0.04 * (12.0 - self.attrs.ar);
+            speed_value *= 1.0 + 0.023 * (12.0 - self.attrs.ar);
         }
 
         // * Calculate accuracy assuming the worst case scenario
@@ -581,11 +585,11 @@ impl OsuPpInner {
         };
 
         // * Scale the speed value with accuracy and OD.
-        speed_value *= (0.95 + self.attrs.od * self.attrs.od / 750.0)
+        speed_value *= (0.946 + self.attrs.od * self.attrs.od / 750.0)
             * ((self.acc + relevant_acc) / 2.0).powf((14.5 - (self.attrs.od).max(8.0)) / 2.0);
 
         // * Scale the speed value with # of 50s to punish doubletapping.
-        speed_value *= 0.99_f64.powf(
+        speed_value *= 0.98_f64.powf(
             (self.state.n50 as f64 >= total_hits / 500.0) as u8 as f64
                 * (self.state.n50 as f64 - total_hits / 500.0),
         );
@@ -618,7 +622,7 @@ impl OsuPpInner {
 
         // * Lots of arbitrary values from testing.
         // * Considering to use derivation from perfect accuracy in a probabilistic manner - assume normal distribution.
-        let mut acc_value = 1.52163_f64.powf(self.attrs.od) * better_acc_percentage.powi(24) * 2.83;
+        let mut acc_value = 1.56663_f64.powf(self.attrs.od) * better_acc_percentage.powi(24) * 2.83;
 
         // * Bonus for many hitcircles - it's harder to keep good accuracy up for longer.
         acc_value *= (amount_hit_objects_with_acc as f64 / 1000.0)
@@ -627,11 +631,11 @@ impl OsuPpInner {
 
         // * Increasing the accuracy value by object count for Blinds isn't ideal, so the minimum buff is given.
         if self.mods.hd() {
-            acc_value *= 1.08;
+            acc_value *= 1.03;
         }
 
         if self.mods.fl() {
-            acc_value *= 1.02;
+            acc_value *= 1.06;
         }
 
         acc_value
@@ -663,7 +667,7 @@ impl OsuPpInner {
         // * Scale the flashlight value with accuracy _slightly_.
         flashlight_value *= 0.5 + self.acc / 2.0;
         // * It is important to also consider accuracy difficulty when doing that.
-        flashlight_value *= 0.98 + self.attrs.od * self.attrs.od / 2500.0;
+        flashlight_value *= 0.968 + self.attrs.od * self.attrs.od / 2500.0;
 
         flashlight_value
     }
