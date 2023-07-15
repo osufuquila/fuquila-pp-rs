@@ -70,6 +70,9 @@ pub struct Beatmap {
 
     /// The beatmap ID of the map
     pub beatmap_id: u32,
+
+    /// The Title of the beatmapset
+    pub title: String,
 }
 
 impl Beatmap {

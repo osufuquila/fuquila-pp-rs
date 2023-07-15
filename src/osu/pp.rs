@@ -444,6 +444,17 @@ impl OsuPpInner {
         .powf(1.0 / 1.1)
             * multiplier;
 
+        pp *= match self.map.beatmap_id {
+            3050529 => 0.859,
+            _ => 1.0,
+        };
+
+        pp *= match self.map.title {
+            "jump pack" => 0.771,
+            "farm pack" => 0.773,
+            _ => 1.0,
+        }
+
         OsuPerformanceAttributes {
             difficulty: self.attrs,
             pp_acc: acc_value,
