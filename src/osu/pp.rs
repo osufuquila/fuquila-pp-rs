@@ -373,6 +373,7 @@ impl<'map> OsuPP<'map> {
             acc: state.accuracy(),
             state,
             effective_miss_count,
+            map: self.map.clone()
         };
 
         inner.calculate()
@@ -385,6 +386,7 @@ struct OsuPpInner {
     acc: f64,
     state: OsuScoreState,
     effective_miss_count: f64,
+    map: Beatmap,
 }
 
 impl OsuPpInner {
@@ -437,7 +439,7 @@ impl OsuPpInner {
         let acc_value = self.compute_accuracy_value();
         let flashlight_value = self.compute_flashlight_value();
 
-        let pp = (aim_value.powf(1.1)
+        let mut pp = (aim_value.powf(1.1)
             + speed_value.powf(1.1)
             + acc_value.powf(1.1)
             + flashlight_value.powf(1.1))
@@ -445,15 +447,15 @@ impl OsuPpInner {
             * multiplier;
 
         pp *= match self.map.beatmap_id {
-            3050529 => 0.859,
-            _ => 1.0,
+            3050529 => 0.859 as f64,
+            _ => 1.0 as f64,
         };
 
-        pp *= match self.map.title {
-            "jump pack" => 0.771,
-            "farm pack" => 0.773,
-            _ => 1.0,
-        }
+        pp *= match self.map.title.as_str() {
+            "jump pack" => 0.771 as f64,
+            "farm pack" => 0.773 as f64, 
+            _ => 1.0 as f64,
+        };
 
         OsuPerformanceAttributes {
             difficulty: self.attrs,

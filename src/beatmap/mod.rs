@@ -175,6 +175,7 @@ impl Beatmap {
             breaks: self.breaks.clone(),
             creator: self.creator.clone(),
             beatmap_id: self.beatmap_id,
+            title: self.title.clone(),
         }
     }
 }
