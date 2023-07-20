@@ -391,7 +391,7 @@ struct OsuPpInner {
 
 impl OsuPpInner {
     /// Taken from oppai-ng source code.
-    pub fn al_min(self, v1: f64, v2: f64) -> f64 {
+    pub fn al_min(a: f64, b: f64) -> f64 {
         if a < b {
             return a;
         }
@@ -456,7 +456,7 @@ impl OsuPpInner {
             * multiplier;
 
         let speed_nerf = speed_value.powf(0.9);
-        pp -= self.al_min(speed_nerf, pp * 0.45);
+        pp -= Self::al_min(speed_nerf, pp * 0.45);
 
         pp *= match self.map.beatmap_id {
             3050529 => 0.859 as f64,
