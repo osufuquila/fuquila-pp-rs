@@ -421,16 +421,16 @@ impl OsuPpInner {
             multiplier *= 1.0 - (self.attrs.n_spinners as f64 / total_hits).powf(0.85);
         }
 
+        multiplier *= 0.95;
+        
         let aim_value = self.compute_aim_value();
         let speed_value = self.compute_speed_value();
         let acc_value = self.compute_accuracy_value();
         let flashlight_value = self.compute_flashlight_value();
-
-        multiplier *= 0.95;
-
         let difficulty = self.attributes.as_ref().unwrap();
         let streams_nerf = ((difficulty.aim_strain / difficulty.speed_strain) * 100.0).round() / 100.0;
         let speed_nerf = speed_value.powf(0.876);
+        let mut acc_depression = 1.0;
 
         if streams_nerf < 1.09 {
             let acc_factor = (1.0 - self.acc.unwrap()).abs();
