@@ -427,7 +427,7 @@ impl OsuPpInner {
         let speed_value = self.compute_speed_value();
         let acc_value = self.compute_accuracy_value();
         let flashlight_value = self.compute_flashlight_value();
-        let difficulty = self.attributes.as_ref().unwrap();
+        let difficulty = self.attrs.as_ref().unwrap();
         let streams_nerf = ((difficulty.aim_strain / difficulty.speed_strain) * 100.0).round() / 100.0;
         let speed_nerf = speed_value.powf(0.876);
         let mut acc_depression = 1.0;
