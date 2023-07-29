@@ -421,33 +421,26 @@ impl OsuPpInner {
             multiplier *= 1.0 - (self.attrs.n_spinners as f64 / total_hits).powf(0.85);
         }
 
-        if self.mods.rx() {
-            // * https://www.desmos.com/calculator/bc9eybdthb
-            // * we use OD13.3 as maximum since it's the value at which great hitwidow becomes 0
-            // * this is well beyond currently maximum achievable OD which is 12.17 (DTx2 + DA with OD11)
-            let (n100_mult, n50_mult) = if self.attrs.od > 0.0 {
-                (
-                    1.0 - (self.attrs.od / 13.33).powf(1.8),
-                    1.0 - (self.attrs.od / 13.33).powi(5),
-                )
-            } else {
-                (1.0, 1.0)
-            };
-
-            // * As we're adding Oks and Mehs to an approximated number of combo breaks the result can be
-            // * higher than total hits in specific scenarios (which breaks some calculations) so we need to clamp it.
-            self.effective_miss_count = (self.effective_miss_count
-                + self.state.n100 as f64
-                + n100_mult
-                + self.state.n50 as f64 * n50_mult)
-                .min(total_hits);
-        }
-
         let aim_value = self.compute_aim_value();
         let speed_value = self.compute_speed_value();
         let acc_value = self.compute_accuracy_value();
         let flashlight_value = self.compute_flashlight_value();
 
+        multiplier *= 0.95;
+
+        let difficulty = self.attributes.as_ref().unwrap();
+        let streams_nerf = ((difficulty.aim_strain / difficulty.speed_strain) * 100.0).round() / 100.0;
+        let speed_nerf = speed_value.powf(0.876);
+
+        if streams_nerf < 1.09 {
+            let acc_factor = (1.0 - self.acc.unwrap()).abs();
+            acc_depression = (0.9 - acc_factor).max(0.486);
+
+            if acc_depression > 0.0 {
+                aim_value *= acc_depression;
+            }
+        }
+        
         let mut pp = (aim_value.powf(1.1)
             + speed_value.powf(1.1)
             + acc_value.powf(1.1)
@@ -455,18 +448,19 @@ impl OsuPpInner {
         .powf(1.0 / 1.1)
             * multiplier;
 
-        let speed_nerf = speed_value.powf(0.9);
         pp -= Self::al_min(speed_nerf, pp * 0.45);
-
         pp *= match self.map.beatmap_id {
-            3050529 => 0.859 as f64,
-            _ => 1.0 as f64,
+            // Camellia - Xeroa [PREON]
+            3050529 => 0.836,
+            // Noah - Deadly force - Put an end [The end.]
+            2870806 => 0.8556,
+            _ => 1.0,
         };
 
         pp *= match self.map.title.as_str() {
-            "jump pack" => 0.771 as f64,
-            "farm pack" => 0.773 as f64, 
-            _ => 1.0 as f64,
+            "jump pack" => 0.771,
+            "farm pack" => 0.773, 
+            _ => 1.0,
         };
 
         OsuPerformanceAttributes {
