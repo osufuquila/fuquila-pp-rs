@@ -399,7 +399,7 @@ impl OsuPpInner {
         b
     }
 
-    fn calculate(mut self) -> OsuPerformanceAttributes {
+    fn calculate(self) -> OsuPerformanceAttributes {
         let total_hits = self.state.total_hits();
 
         if total_hits == 0 {
@@ -423,18 +423,17 @@ impl OsuPpInner {
 
         multiplier *= 0.95;
         
-        let aim_value = self.compute_aim_value();
+        let mut aim_value = self.compute_aim_value();
         let speed_value = self.compute_speed_value();
         let acc_value = self.compute_accuracy_value();
         let flashlight_value = self.compute_flashlight_value();
         let difficulty = self.attrs.clone();
-        let streams_nerf = ((difficulty.aim_strain / difficulty.speed_strain) * 100.0).round() / 100.0;
+        let streams_nerf = ((difficulty.aim / difficulty.speed) * 100.0).round() / 100.0;
         let speed_nerf = speed_value.powf(0.876);
-        let mut acc_depression = 1.0;
 
         if streams_nerf < 1.09 {
-            let acc_factor = (1.0 - self.acc.unwrap()).abs();
-            acc_depression = (0.9 - acc_factor).max(0.486);
+            let acc_factor = (1.0 - self.acc.clone()).abs();
+            let acc_depression = (0.9 - acc_factor).max(0.486);
 
             if acc_depression > 0.0 {
                 aim_value *= acc_depression;
@@ -451,7 +450,7 @@ impl OsuPpInner {
         pp -= Self::al_min(speed_nerf, pp * 0.45);
         pp *= match self.map.beatmap_id {
             // Camellia - Xeroa [PREON]
-            3050529 => 0.836,
+            3050529 => 0.8316,
             // Noah - Deadly force - Put an end [The end.]
             2870806 => 0.8556,
             _ => 1.0,
