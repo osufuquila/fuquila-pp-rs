@@ -432,7 +432,7 @@ impl OsuPpInner {
         let speed_nerf = speed_value.powf(0.876);
 
         if streams_nerf < 1.09 {
-            let acc_factor = (1.0 - self.acc.clone()).abs();
+            let acc_factor = (1.0 - self.acc).abs();
             let acc_depression = (0.9 - acc_factor).max(0.486);
 
             if acc_depression > 0.0 {
